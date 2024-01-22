@@ -229,6 +229,9 @@ class authentication {
 					$_SESSION["user_uuid"] = $result["user_uuid"];
 					$_SESSION["context"] = $result['domain_name'];
 
+				//used to validate the session
+					$_SESSION["user_hash"] = hash('sha256', $_SERVER['REMOTE_ADDR'].$_SERVER['HTTP_USER_AGENT']);
+
 				//user session array
 					$_SESSION["user"]["domain_uuid"] = $result["domain_uuid"];
 					$_SESSION["user"]["domain_name"] = $result["domain_name"];
@@ -266,7 +269,7 @@ class authentication {
 						}
 					}
 
-				//get the permissions assigned to the groups that the user is a member of set the permissions in $_SESSION['permissions']
+					//get the permissions assigned to the groups that the user is a member of set the permissions in $_SESSION['permissions']
 					if (is_array($_SESSION["groups"]) && @sizeof($_SESSION["groups"]) != 0) {
 						$x = 0;
 						$sql = "select distinct(permission_name) from v_group_permissions ";
