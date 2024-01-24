@@ -48,7 +48,7 @@
 	}
 
 //validate the session address
-	if ($_SESSION['authorized'] && $_SESSION["user_hash"] !== hash('sha256', $_SERVER['REMOTE_ADDR'].$_SERVER['HTTP_USER_AGENT'])) {
+	if ($_SESSION['authorized'] && $_SESSION["user_hash"] !== hash('sha256', $_SERVER['HTTP_USER_AGENT'])) {
 		session_destroy();
 		header("Location: ".PROJECT_PATH."/logout.php");
 	}
