@@ -5,6 +5,7 @@
  * Provides an abstracted cache
  */
 class cache {
+
 	private $settings;
 	private $syslog;
 	private $location;
@@ -52,15 +53,17 @@ class cache {
 		//save to memcache
 			if ($this->method === "memcache") {
 				//connect to event socket
-					$esl = event_socket::create();
-					if ($esl === false) {
+					$fp = event_socket_create($_SESSION['event_socket_ip_address'], $_SESSION['event_socket_port'], $_SESSION['event_socket_password']);
+					if ($fp === false) {
 						return false;
 					}
 
 				//run the memcache
 					$command = "memcache set ".$key." ".$value;
-					$result = event_socket::api($command);
+					$result = event_socket_request($fp, 'api '.$command);
 
+				//close event socket
+					fclose($fp);
 			}
 
 		//save to the file cache
@@ -84,8 +87,8 @@ class cache {
 		//cache method memcache
 			if ($this->method === "memcache") {
 				// connect to event socket
-					$esl = event_socket::create();
-					if (!$esl->is_connected()) {
+					$fp = event_socket_create($_SESSION['event_socket_ip_address'], $_SESSION['event_socket_port'], $_SESSION['event_socket_password']);
+					if ($fp === false) {
 						return false;
 					}
 
@@ -93,8 +96,10 @@ class cache {
 
 				//run the memcache
 					$command = "memcache get ".$key;
-					$result = event_socket::api($command);
+					$result = event_socket_request($fp, 'api '.$command);
 
+				//close event socket
+					fclose($fp);
 			}
 
 		//get the file cache
@@ -124,8 +129,8 @@ class cache {
 		//cache method memcache
 			if ($this->method === "memcache") {
 				//connect to event socket
-					$esl = event_socket::create();
-					if ($esl === false) {
+					$fp = event_socket_create($_SESSION['event_socket_ip_address'], $_SESSION['event_socket_port'], $_SESSION['event_socket_password']);
+					if ($fp === false) {
 						return false;
 					}
 
@@ -135,12 +140,14 @@ class cache {
 					$event .= "Event-Subclass: fusion::memcache\n";
 					$event .= "API-Command: memcache\n";
 					$event .= "API-Command-Argument: delete ".$key."\n";
-					event_socket::command($event);
+					event_socket_request($fp, $event);
 
 				//run the memcache
 					$command = "memcache delete ".$key;
-					$result = event_socket::api($command);
+					$result = event_socket_request($fp, 'api '.$command);
 
+				//close event socket
+					fclose($fp);
 			}
 
 		//cache method file
@@ -149,8 +156,8 @@ class cache {
 					$key = str_replace(":", ".", $key);
 
 				//connect to event socket
-					$esl = event_socket::create();
-					if ($esl === false) {
+					$fp = event_socket_create($_SESSION['event_socket_ip_address'], $_SESSION['event_socket_port'], $_SESSION['event_socket_password']);
+					if ($fp === false) {
 						return false;
 					}
 
@@ -160,7 +167,7 @@ class cache {
 					$event .= "Event-Subclass: fusion::file\n";
 					$event .= "API-Command: cache\n";
 					$event .= "API-Command-Argument: delete ".$key."\n";
-					event_socket::command($event);
+					event_socket_request($fp, $event);
 
 				//remove the local files
 					foreach (glob($this->location . "/" . $key) as $file) {
@@ -190,8 +197,8 @@ class cache {
 		//cache method memcache
 			if ($this->method === "memcache") {
 				// connect to event socket
-					$esl = event_socket::create();
-					if ($esl === false) {
+					$fp = event_socket_create($_SESSION['event_socket_ip_address'], $_SESSION['event_socket_port'], $_SESSION['event_socket_password']);
+					if ($fp === false) {
 						return false;
 					}
 
@@ -201,19 +208,21 @@ class cache {
 					$event .= "Event-Subclass: fusion::memcache\n";
 					$event .= "API-Command: memcache\n";
 					$event .= "API-Command-Argument: flush\n";
-					event_socket::command($event);
+					event_socket_request($fp, $event);
 
 				//run the memcache
 					$command = "memcache flush";
-					$result = event_socket::api($command);
+					$result = event_socket_request($fp, 'api '.$command);
 
+				//close event socket
+					fclose($fp);
 			}
 
 		//cache method file
 			if ($this->method === "file") {
-				// connect to event socket
-					$esl = event_socket::create();
-					if ($esl === false) {
+				//connect to event socket
+					$fp = event_socket_create($_SESSION['event_socket_ip_address'], $_SESSION['event_socket_port'], $_SESSION['event_socket_password']);
+					if ($fp === false) {
 						return false;
 					}
 
@@ -223,7 +232,7 @@ class cache {
 					$event .= "Event-Subclass: fusion::file\n";
 					$event .= "API-Command: cache\n";
 					$event .= "API-Command-Argument: flush\n";
-					event_socket::command($event);
+					event_socket_request($fp, $event);
 
 				//remove the cache
 					recursive_delete($this->location);
